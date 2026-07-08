@@ -70,7 +70,7 @@
       height: auto;
       display: block;
       cursor: grab;
-      touch-action: none; /* Mencegah scroll layar HP saat menggeser teks di canvas */
+      touch-action: none;
     }
 
     canvas:active {
@@ -108,7 +108,6 @@
       padding-bottom: 4px;
     }
 
-    /* D-Pad Tombol Arah */
     .dpad {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -145,7 +144,6 @@
       color: #475569;
     }
 
-    /* Form Input Data */
     .form-group {
       margin-bottom: 12px;
     }
@@ -173,21 +171,76 @@
       box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
     }
 
-    .btn-primary {
+    .btn {
       width: 100%;
       padding: 14px;
-      background-color: #0f172a;
-      color: white;
       border: none;
       border-radius: 8px;
       font-size: 16px;
       font-weight: bold;
       cursor: pointer;
       transition: background 0.2s, transform 0.1s;
+      margin-bottom: 10px;
     }
 
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background-color: #0f172a; color: white; }
     .btn-primary:hover { background-color: #1e293b; }
-    .btn-primary:active { transform: scale(0.98); }
+    .btn-success { background-color: #16a34a; color: white; }
+    .btn-success:hover { background-color: #15803d; }
+    .btn-secondary { background-color: #64748b; color: white; font-size: 14px; padding: 10px; }
+    .btn-secondary:hover { background-color: #475569; }
+    
+    .hidden { display: none !important; }
+
+    /* ==========================================
+       DESAIN MODAL / POPUP HASIL DOWNLOAD
+       ========================================== */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.85);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 15px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-content h3 {
+      color: #0f172a;
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .modal-content p {
+      font-size: 12px;
+      color: #475569;
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+
+    .modal-content img {
+      width: 100%;
+      max-width: 280px;
+      height: auto;
+      border: 2px solid #cbd5e1;
+      border-radius: 8px;
+      margin: 0 auto 15px auto;
+      display: block;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
   </style>
 </head>
 <body>
@@ -270,11 +323,31 @@
             <option value="SEKBID 4: INVENTARIS & PENGELOLAAN">SEKBID 4: INVENTARIS & PENGELOLAAN</option>
             <option value="SEKBID 5: KOMUNIKASI & PUBLIKASI">SEKBID 5: KOMUNIKASI & PUBLIKASI</option>
           </optgroup>
+          <optgroup label="--- KEPANITIAAN LAINNYA ---">
+            <option value="KETUA PELAKSANA">KETUA PELAKSANA</option>
+            <option value="PANITIA ACARA">PANITIA ACARA</option>
+            <option value="PANITIA DOKUMENTASI">PANITIA DOKUMENTASI</option>
+            <option value="PANITIA KEAMANAN">PANITIA KEAMANAN</option>
+            <option value="PANITIA KONSUMSI">PANITIA KONSUMSI</option>
+          </optgroup>
         </select>
       </div>
     </div>
 
-    <button id="download-btn" class="btn-primary">➔ Download ID Card Sekarang (PNG)</button>
+    <button id="download-btn" class="btn btn-primary">➔ Download ID Card Sekarang (PNG)</button>
+  </div>
+
+  <div id="modal-result" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h3>🎉 ID Card Berhasil Dibuat!</h3>
+      <p>Jika unduhan tidak otomatis dimulai di HP kamu, <br><b>Tekan Lama (Long-Press) pada gambar di bawah ini</b>, lalu pilih <b>"Simpan Gambar" / "Save Image"</b>.</p>
+      
+      <img id="result-img" src="" alt="Hasil ID Card">
+      
+      <a id="manual-download-btn" href="" download="" class="btn btn-success" style="display:block; text-decoration:none; text-align:center;">⬇️ Klik Untuk Download Manual</a>
+      
+      <button id="close-modal-btn" class="btn btn-secondary">⬅️ Tutup & Edit Kembali</button>
+    </div>
   </div>
 
   <script type="module">
@@ -284,23 +357,29 @@
     const ctx = canvas.getContext('2d');
     const downloadBtn = document.getElementById('download-btn');
 
-    // Variabel Koordinat & Ukuran Teks (Dalam Persentase terhadap Canvas)
-    let namaX = 50;      // 50% = tepat di tengah horizontal
-    let namaY = 68.2;    // Posisi vertikal kotak putih atas
-    let namaSize = 3.8;  // Ukuran font nama
-    
-    let jabX = 50;       // 50% = tepat di tengah horizontal
-    let jabY = 79.5;     // Posisi vertikal kotak putih bawah
-    let jabSize = 3.2;   // Ukuran font jabatan
+    // Elemen Modal Popup
+    const modalResult = document.getElementById('modal-result');
+    const resultImg = document.getElementById('result-img');
+    const manualDownloadBtn = document.getElementById('manual-download-btn');
+    const closeModalBtn = document.getElementById('close-modal-btn');
 
-    // Variabel state untuk fitur drag teks langsung di canvas
+    let namaX = 50;      
+    let namaY = 68.2;    
+    let namaSize = 3.8;  
+    
+    let jabX = 50;       
+    let jabY = 79.5;     
+    let jabSize = 3.2;   
+
     let isDragging = false;
-    let dragTarget = null; // 'nama' atau 'jabatan'
+    let dragTarget = null; 
 
     const templateImage = new Image();
     let isImageLoaded = false;
 
-    templateImage.src = 'https://cdn.yupra.my.id/yp/uwn4z1h6.jpg';
+    templateImage.crossOrigin = "anonymous";
+    templateImage.src = 'media/idcard.png';
+    
     templateImage.onload = () => {
       isImageLoaded = true;
       canvas.width = templateImage.width || 1080;
@@ -308,7 +387,6 @@
       draw();
     };
 
-    // Fungsi Render Utama ke Canvas
     function draw() {
       if (!isImageLoaded) return;
 
@@ -318,33 +396,31 @@
       const teksNama = inputNama.value.trim().toUpperCase() || "NAMA LENGKAP";
       const teksJabatan = inputJabatan.value.toUpperCase();
 
-      // 1. Gambar Teks Nama
+      // Gambar Nama
       const nX = canvas.width * (namaX / 100);
       const nY = canvas.height * (namaY / 100);
       const nFontSize = canvas.width * (namaSize / 100);
       
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#0f172a'; // Slate hitam gelap
+      ctx.fillStyle = '#0f172a'; 
       ctx.font = `900 ${nFontSize}px 'Segoe UI', Arial, sans-serif`;
       ctx.fillText(teksNama, nX, nY, canvas.width * 0.75);
 
-      // 2. Gambar Teks Jabatan
+      // Gambar Jabatan
       const jX = canvas.width * (jabX / 100);
       const jY = canvas.height * (jabY / 100);
       const jFontSize = canvas.width * (jabSize / 100);
       
-      ctx.fillStyle = '#15803d'; // Hijau gelap
+      ctx.fillStyle = '#15803d'; 
       ctx.font = `800 ${jFontSize}px 'Segoe UI', Arial, sans-serif`;
       ctx.fillText(teksJabatan, jX, jY, canvas.width * 0.75);
     }
 
-    // --- EVENT LISTENER REAL-TIME INPUT ---
     inputNama.addEventListener('input', draw);
     inputJabatan.addEventListener('change', draw);
 
-    // --- LOGIKA TOMBOL KALIBRASI NAMA ---
-    const step = 0.5; // Jarak geser per klik
+    const step = 0.5;
     document.getElementById('btn-nama-up').addEventListener('click', () => { namaY -= step; draw(); });
     document.getElementById('btn-nama-down').addEventListener('click', () => { namaY += step; draw(); });
     document.getElementById('btn-nama-left').addEventListener('click', () => { namaX -= step; draw(); });
@@ -352,7 +428,6 @@
     document.getElementById('btn-nama-plus').addEventListener('click', () => { namaSize += 0.2; draw(); });
     document.getElementById('btn-nama-minus').addEventListener('click', () => { namaSize = Math.max(1, namaSize - 0.2); draw(); });
 
-    // --- LOGIKA TOMBOL KALIBRASI JABATAN ---
     document.getElementById('btn-jab-up').addEventListener('click', () => { jabY -= step; draw(); });
     document.getElementById('btn-jab-down').addEventListener('click', () => { jabY += step; draw(); });
     document.getElementById('btn-jab-left').addEventListener('click', () => { jabX -= step; draw(); });
@@ -360,7 +435,6 @@
     document.getElementById('btn-jab-plus').addEventListener('click', () => { jabSize += 0.2; draw(); });
     document.getElementById('btn-jab-minus').addEventListener('click', () => { jabSize = Math.max(1, jabSize - 0.2); draw(); });
 
-    // --- LOGIKA INTERAKTIF: GESER TEKS DI CANVAS (MOUSE & TOUCH) ---
     function getCanvasCoords(e) {
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
@@ -379,8 +453,6 @@
       
       const nY_pixel = canvas.height * (namaY / 100);
       const jY_pixel = canvas.height * (jabY / 100);
-
-      // Cek apakah sentuhan lebih dekat ke teks Nama atau Jabatan
       const distNama = Math.abs(pt.y - nY_pixel);
       const distJab = Math.abs(pt.y - jY_pixel);
 
@@ -395,7 +467,7 @@
 
     function drag(e) {
       if (!isDragging || !dragTarget) return;
-      e.preventDefault(); // Mencegah scrolling saat menggeser teks
+      e.preventDefault();
       const pt = getCanvasCoords(e);
 
       if (dragTarget === 'nama') {
@@ -413,27 +485,61 @@
       dragTarget = null;
     }
 
-    // Event Mouse (Komputer/Laptop)
     canvas.addEventListener('mousedown', startDrag);
     canvas.addEventListener('mousemove', drag);
     canvas.addEventListener('mouseup', stopDrag);
     canvas.addEventListener('mouseleave', stopDrag);
 
-    // Event Touch (HP Android / iOS)
     canvas.addEventListener('touchstart', startDrag, { passive: false });
     canvas.addEventListener('touchmove', drag, { passive: false });
     canvas.addEventListener('touchend', stopDrag);
 
-    // --- FITUR DOWNLOAD ---
+    // ==========================================
+    // SISTEM DOWNLOAD SMART (BLOB + POPUP HASIL)
+    // ==========================================
     downloadBtn.addEventListener('click', () => {
+      draw(); // Pastikan gambar terbaru yang dirender
+      
       const teksNama = inputNama.value.trim() || "IDCard";
-      const dataURL = canvas.toDataURL('image/png');
-      const link = document.createElement('a');
-      link.download = `IDCard_MPLS_${teksNama.replace(/\s+/g, '_')}.png`;
-      link.href = dataURL;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const fileName = `IDCard_MPLS_${teksNama.replace(/\s+/g, '_')}.png`;
+
+      // Mengubah canvas menjadi Blob Gambar yang sangat disukai browser HP
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          alert("Gagal memproses gambar. Pastikan gambar template ada di folder media/");
+          return;
+        }
+
+        const imageURL = URL.createObjectURL(blob);
+        
+        // 1. Set gambar ke dalam Popup Modal
+        resultImg.src = imageURL;
+        manualDownloadBtn.href = imageURL;
+        manualDownloadBtn.download = fileName;
+
+        // 2. Tampilkan Popup Modal
+        modalResult.classList.remove('hidden');
+
+        // 3. Coba unduh otomatis secara latar belakang (Jika diblokir, popup sudah standby)
+        setTimeout(() => {
+          try {
+            const tempLink = document.createElement('a');
+            tempLink.href = imageURL;
+            tempLink.download = fileName;
+            document.body.appendChild(tempLink);
+            tempLink.click();
+            document.body.removeChild(tempLink);
+          } catch (err) {
+            console.log("Auto-download diblokir browser, pengguna bisa menggunakan popup.");
+          }
+        }, 300);
+
+      }, 'image/png');
+    });
+
+    // Tombol Tutup Popup
+    closeModalBtn.addEventListener('click', () => {
+      modalResult.classList.add('hidden');
     });
   </script>
 </body>
