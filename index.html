@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generator ID Card MPLS 2026 - SMKS Tunas Harapan</title>
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #f0f4f8;
+      color: #333;
+      padding: 15px;
+    }
+
+    .container {
+      max-width: 520px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      color: #0f172a; 
+      font-size: 20px;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    header p {
+      font-size: 13px;
+      color: #16a34a;
+      font-weight: bold;
+    }
+
+    .step-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+
+    /* Area Canvas Preview */
+    .canvas-container {
+      width: 100%;
+      border: 2px solid #cbd5e1;
+      border-radius: 8px;
+      overflow: hidden;
+      background-color: #e2e8f0;
+      position: relative;
+      margin-bottom: 10px;
+    }
+
+    canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+      cursor: grab;
+      touch-action: none; /* Mencegah scroll layar HP saat menggeser teks di canvas */
+    }
+
+    canvas:active {
+      cursor: grabbing;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: #64748b;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    /* Panel Kontrol Kalibrasi */
+    .calibration-panel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .cal-box {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .cal-box h4 {
+      font-size: 12px;
+      color: #334155;
+      margin-bottom: 8px;
+      border-bottom: 1px dashed #cbd5e1;
+      padding-bottom: 4px;
+    }
+
+    /* D-Pad Tombol Arah */
+    .dpad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      max-width: 110px;
+      margin: 0 auto 8px auto;
+    }
+
+    .btn-cal {
+      padding: 6px 0;
+      background: #e2e8f0;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      font-weight: bold;
+      color: #1e293b;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 0.1s;
+    }
+
+    .btn-cal:hover { background: #cbd5e1; }
+    .btn-cal:active { background: #94a3b8; transform: scale(0.95); }
+
+    .size-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .size-controls span {
+      font-size: 11px;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    /* Form Input Data */
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #1e293b;
+    }
+
+    input[type="text"], select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 14px;
+      background-color: #fff;
+    }
+
+    input[type="text"]:focus, select:focus {
+      outline: none;
+      border-color: #0f172a;
+      box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      background-color: #0f172a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-primary:hover { background-color: #1e293b; }
+    .btn-primary:active { transform: scale(0.98); }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>ID CARD MPLS 2026</h1>
+      <p>OSIS & MPK SMKS TUNAS HARAPAN</p>
+    </header>
+
+    <div class="canvas-container">
+      <canvas id="canvas"></canvas>
+    </div>
+    <p class="hint">💡 Tip: Kamu bisa langsung <b>menggeser teks di dalam gambar</b> atau gunakan tombol arah di bawah ini agar posisinya seimbang!</p>
+
+    <div class="calibration-panel">
+      <div class="cal-box">
+        <h4>⚙️ Posisi & Ukuran NAMA</h4>
+        <div class="dpad">
+          <div></div>
+          <button class="btn-cal" id="btn-nama-up">⬆️</button>
+          <div></div>
+          <button class="btn-cal" id="btn-nama-left">⬅️</button>
+          <button class="btn-cal" id="btn-nama-down">⬇️</button>
+          <button class="btn-cal" id="btn-nama-right">➡️</button>
+        </div>
+        <div class="size-controls">
+          <span>Ukuran:</span>
+          <button class="btn-cal" style="width:28px;" id="btn-nama-minus">➖</button>
+          <button class="btn-cal" style="width:28px;" id="btn-nama-plus">➕</button>
+        </div>
+      </div>
+
+      <div class="cal-box">
+        <h4>⚙️ Posisi & Ukuran JABATAN</h4>
+        <div class="dpad">
+          <div></div>
+          <button class="btn-cal" id="btn-jab-up">⬆️</button>
+          <div></div>
+          <button class="btn-cal" id="btn-jab-left">⬅️</button>
+          <button class="btn-cal" id="btn-jab-down">⬇️</button>
+          <button class="btn-cal" id="btn-jab-right">➡️</button>
+        </div>
+        <div class="size-controls">
+          <span>Ukuran:</span>
+          <button class="btn-cal" style="width:28px;" id="btn-jab-minus">➖</button>
+          <button class="btn-cal" style="width:28px;" id="btn-jab-plus">➕</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-box">
+      <div class="form-group">
+        <label for="input-nama">Ketikan Nama Lengkap</label>
+        <input type="text" id="input-nama" placeholder="Contoh: AHMAD FAUZI">
+      </div>
+
+      <div class="form-group">
+        <label for="input-jabatan">Pilih Jabatan (OSIS / MPK / Panitia)</label>
+        <select id="input-jabatan">
+          <optgroup label="--- KEPENGURUSAN MPK ---">
+            <option value="KETUA MPK">KETUA MPK</option>
+            <option value="WAKIL KETUA MPK">WAKIL KETUA MPK</option>
+            <option value="SEKRETARIS MPK">SEKRETARIS MPK</option>
+            <option value="BENDAHARA MPK">BENDAHARA MPK</option>
+            <option value="ANGGOTA MPK">ANGGOTA MPK</option>
+          </optgroup>
+          <optgroup label="--- KEPENGURUSAN OSIS ---">
+            <option value="KETUA OSIS">KETUA OSIS</option>
+            <option value="WAKIL KETUA OSIS">WAKIL KETUA OSIS</option>
+            <option value="SEKRETARIS 1">SEKRETARIS 1</option>
+            <option value="SEKRETARIS 2">SEKRETARIS 2</option>
+            <option value="BENDAHARA 1">BENDAHARA 1</option>
+            <option value="BENDAHARA 2">BENDAHARA 2</option>
+          </optgroup>
+          <optgroup label="--- SEKSI BIDANG (SEKBID) ---">
+            <option value="SEKBID 1: KEROHANIAN & KEDISIPLINAN">SEKBID 1: KEROHANIAN & KEDISIPLINAN</option>
+            <option value="SEKBID 2: SENI & KREATIVITAS">SEKBID 2: SENI & KREATIVITAS</option>
+            <option value="SEKBID 3: KEAMANAN & KEBERSIHAN">SEKBID 3: KEAMANAN & KEBERSIHAN</option>
+            <option value="SEKBID 4: INVENTARIS & PENGELOLAAN">SEKBID 4: INVENTARIS & PENGELOLAAN</option>
+            <option value="SEKBID 5: KOMUNIKASI & PUBLIKASI">SEKBID 5: KOMUNIKASI & PUBLIKASI</option>
+          </optgroup>
+        </select>
+      </div>
+    </div>
+
+    <button id="download-btn" class="btn-primary">➔ Download ID Card Sekarang (PNG)</button>
+  </div>
+
+  <script type="module">
+    const inputNama = document.getElementById('input-nama');
+    const inputJabatan = document.getElementById('input-jabatan');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const downloadBtn = document.getElementById('download-btn');
+
+    // Variabel Koordinat & Ukuran Teks (Dalam Persentase terhadap Canvas)
+    let namaX = 50;      // 50% = tepat di tengah horizontal
+    let namaY = 68.2;    // Posisi vertikal kotak putih atas
+    let namaSize = 3.8;  // Ukuran font nama
+    
+    let jabX = 50;       // 50% = tepat di tengah horizontal
+    let jabY = 79.5;     // Posisi vertikal kotak putih bawah
+    let jabSize = 3.2;   // Ukuran font jabatan
+
+    // Variabel state untuk fitur drag teks langsung di canvas
+    let isDragging = false;
+    let dragTarget = null; // 'nama' atau 'jabatan'
+
+    const templateImage = new Image();
+    let isImageLoaded = false;
+
+    templateImage.src = 'https://cdn.yupra.my.id/yp/uwn4z1h6.jpg';
+    templateImage.onload = () => {
+      isImageLoaded = true;
+      canvas.width = templateImage.width || 1080;
+      canvas.height = templateImage.height || 1414;
+      draw();
+    };
+
+    // Fungsi Render Utama ke Canvas
+    function draw() {
+      if (!isImageLoaded) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(templateImage, 0, 0, canvas.width, canvas.height);
+
+      const teksNama = inputNama.value.trim().toUpperCase() || "NAMA LENGKAP";
+      const teksJabatan = inputJabatan.value.toUpperCase();
+
+      // 1. Gambar Teks Nama
+      const nX = canvas.width * (namaX / 100);
+      const nY = canvas.height * (namaY / 100);
+      const nFontSize = canvas.width * (namaSize / 100);
+      
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#0f172a'; // Slate hitam gelap
+      ctx.font = `900 ${nFontSize}px 'Segoe UI', Arial, sans-serif`;
+      ctx.fillText(teksNama, nX, nY, canvas.width * 0.75);
+
+      // 2. Gambar Teks Jabatan
+      const jX = canvas.width * (jabX / 100);
+      const jY = canvas.height * (jabY / 100);
+      const jFontSize = canvas.width * (jabSize / 100);
+      
+      ctx.fillStyle = '#15803d'; // Hijau gelap
+      ctx.font = `800 ${jFontSize}px 'Segoe UI', Arial, sans-serif`;
+      ctx.fillText(teksJabatan, jX, jY, canvas.width * 0.75);
+    }
+
+    // --- EVENT LISTENER REAL-TIME INPUT ---
+    inputNama.addEventListener('input', draw);
+    inputJabatan.addEventListener('change', draw);
+
+    // --- LOGIKA TOMBOL KALIBRASI NAMA ---
+    const step = 0.5; // Jarak geser per klik
+    document.getElementById('btn-nama-up').addEventListener('click', () => { namaY -= step; draw(); });
+    document.getElementById('btn-nama-down').addEventListener('click', () => { namaY += step; draw(); });
+    document.getElementById('btn-nama-left').addEventListener('click', () => { namaX -= step; draw(); });
+    document.getElementById('btn-nama-right').addEventListener('click', () => { namaX += step; draw(); });
+    document.getElementById('btn-nama-plus').addEventListener('click', () => { namaSize += 0.2; draw(); });
+    document.getElementById('btn-nama-minus').addEventListener('click', () => { namaSize = Math.max(1, namaSize - 0.2); draw(); });
+
+    // --- LOGIKA TOMBOL KALIBRASI JABATAN ---
+    document.getElementById('btn-jab-up').addEventListener('click', () => { jabY -= step; draw(); });
+    document.getElementById('btn-jab-down').addEventListener('click', () => { jabY += step; draw(); });
+    document.getElementById('btn-jab-left').addEventListener('click', () => { jabX -= step; draw(); });
+    document.getElementById('btn-jab-right').addEventListener('click', () => { jabX += step; draw(); });
+    document.getElementById('btn-jab-plus').addEventListener('click', () => { jabSize += 0.2; draw(); });
+    document.getElementById('btn-jab-minus').addEventListener('click', () => { jabSize = Math.max(1, jabSize - 0.2); draw(); });
+
+    // --- LOGIKA INTERAKTIF: GESER TEKS DI CANVAS (MOUSE & TOUCH) ---
+    function getCanvasCoords(e) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return {
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top) * scaleY
+      };
+    }
+
+    function startDrag(e) {
+      if (!isImageLoaded) return;
+      const pt = getCanvasCoords(e);
+      
+      const nY_pixel = canvas.height * (namaY / 100);
+      const jY_pixel = canvas.height * (jabY / 100);
+
+      // Cek apakah sentuhan lebih dekat ke teks Nama atau Jabatan
+      const distNama = Math.abs(pt.y - nY_pixel);
+      const distJab = Math.abs(pt.y - jY_pixel);
+
+      if (distNama < distJab && distNama < 120) {
+        isDragging = true;
+        dragTarget = 'nama';
+      } else if (distJab <= distNama && distJab < 120) {
+        isDragging = true;
+        dragTarget = 'jabatan';
+      }
+    }
+
+    function drag(e) {
+      if (!isDragging || !dragTarget) return;
+      e.preventDefault(); // Mencegah scrolling saat menggeser teks
+      const pt = getCanvasCoords(e);
+
+      if (dragTarget === 'nama') {
+        namaX = (pt.x / canvas.width) * 100;
+        namaY = (pt.y / canvas.height) * 100;
+      } else if (dragTarget === 'jabatan') {
+        jabX = (pt.x / canvas.width) * 100;
+        jabY = (pt.y / canvas.height) * 100;
+      }
+      draw();
+    }
+
+    function stopDrag() {
+      isDragging = false;
+      dragTarget = null;
+    }
+
+    // Event Mouse (Komputer/Laptop)
+    canvas.addEventListener('mousedown', startDrag);
+    canvas.addEventListener('mousemove', drag);
+    canvas.addEventListener('mouseup', stopDrag);
+    canvas.addEventListener('mouseleave', stopDrag);
+
+    // Event Touch (HP Android / iOS)
+    canvas.addEventListener('touchstart', startDrag, { passive: false });
+    canvas.addEventListener('touchmove', drag, { passive: false });
+    canvas.addEventListener('touchend', stopDrag);
+
+    // --- FITUR DOWNLOAD ---
+    downloadBtn.addEventListener('click', () => {
+      const teksNama = inputNama.value.trim() || "IDCard";
+      const dataURL = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = `IDCard_MPLS_${teksNama.replace(/\s+/g, '_')}.png`;
+      link.href = dataURL;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  </script>
+</body>
+</html>
